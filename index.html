@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BYTKOP</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* ЗАПРЕТ ВЫДЕЛЕНИЯ ТЕКСТА */
+        body {
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+            font-family: 'Montserrat', sans-serif;
+            color: #ffffff;
+            background: linear-gradient(-45deg, #000000, #1a1a1a, #2c2c2c, #0f0f0f);
+            background-size: 400% 400%;
+            animation: gradientAnimation 15s ease infinite;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .nav-menu { margin-top: 40px; display: flex; gap: 20px; z-index: 10; }
+        
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white; padding: 12px 30px; cursor: pointer;
+            font-family: 'Montserrat', sans-serif; font-size: 0.8rem;
+            text-transform: uppercase; letter-spacing: 2px;
+            transition: all 0.4s ease; border-radius: 12px;
+        }
+
+        .nav-btn.active { background: #ffffff; color: #000; }
+
+        .content-section {
+            display: none; width: 90%; max-width: 850px; margin-top: 50px;
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .content-section.active { display: block; opacity: 1; transform: translateY(0); }
+
+        h1 { 
+            font-size: 3.5rem; 
+            font-weight: 700; 
+            text-align: center; 
+            margin-bottom: 0; /* Убираем нижний отступ, чтобы точно отмерить 6см */
+            letter-spacing: 8px; 
+            text-transform: uppercase; 
+        }
+
+        /* ПРИВЕТСТВЕННЫЙ ТЕКСТ (КУРСИВ И ОТСТУП 6 СМ) */
+        .welcome-text {
+            margin-top: 230px; /* Примерно 6 сантиметров от заголовка */
+            font-style: italic;
+            text-align: center;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #d1d1d1;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px;
+            display: flex; align-items: center; padding: 35px; margin-top: 50px; margin-bottom: 25px;
+        }
+
+        .card-img { width: 140px; height: 140px; border-radius: 18px; object-fit: cover; margin-right: 30px; background: #222; }
+
+        .contact-container { display: flex; flex-direction: column; gap: 20px; align-items: center; }
+        
+        .social-link {
+            width: 100%; max-width: 400px; display: flex; align-items: center; justify-content: center;
+            gap: 15px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px; border-radius: 20px; text-decoration: none; color: white;
+            font-size: 1.2rem; font-weight: 700; transition: all 0.4s ease;
+        }
+        
+        .social-link.tg:hover { background: #0088cc; transform: scale(1.05); }
+        .social-link.dc:hover { background: #5865F2; transform: scale(1.05); }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <nav class="nav-menu">
+        <button class="nav-btn active" onclick="openTab('home')">Biography</button>
+        <button class="nav-btn" onclick="openTab('contact')">Contact</button>
+    </nav>
+
+    <div id="home" class="content-section active">
+        <h1>BytKop</h1>
+        
+        <p class="welcome-text">
+            Здравствуй, посетитель!
+        </p>
+
+        <div class="info-card">
+            <img src="img/photo1.jpg" alt="Bio" class="card-img">
+            <div class="card-text">
+                <h2>ОБО МНЕ</h2>
+                <p></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact" class="content-section">
+        <h1>Contact</h1>
+        <div class="contact-container">
+            <a href="https://t.me/BytKop" target="_blank" class="social-link tg">
+                <i class="fa-brands fa-telegram"></i> Telegram: @BytKop
+            </a>
+            <a href="https://discord.com/users/bytkop" target="_blank" class="social-link dc">
+                <i class="fa-brands fa-discord"></i> Discord: bytkop
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Запрет копирования
+        document.onkeydown = function(e) {
+            if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73)) return false;
+        };
+
+        function openTab(tabId) {
+            const currentSection = document.querySelector('.content-section.active');
+            const nextSection = document.getElementById(tabId);
+            const buttons = document.querySelectorAll('.nav-btn');
+            if (currentSection.id === tabId) return;
+            currentSection.style.opacity = '0';
+            currentSection.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                currentSection.classList.remove('active');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                if(tabId === 'home') buttons[0].classList.add('active');
+                else buttons[1].classList.add('active');
+                nextSection.classList.add('active');
+                setTimeout(() => {
+                    nextSection.style.opacity = '1';
+                    nextSection.style.transform = 'translateY(0)';
+                }, 50);
+            }, 400);
+        }
+    </script>
+</body>
+</html>
