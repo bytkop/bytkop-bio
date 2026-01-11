@@ -3,160 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BYTKOP</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    <title>Доншнур</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* ЗАПРЕТ ВЫДЕЛЕНИЯ ТЕКСТА */
-        body {
-            -webkit-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            margin: 0; padding: 0;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh;
-            font-family: 'Montserrat', sans-serif;
-            color: #ffffff;
-            background: linear-gradient(-45deg, #000000, #1a1a1a, #2c2c2c, #0f0f0f);
-            background-size: 400% 400%;
-            animation: gradientAnimation 15s ease infinite;
-            overflow-x: hidden;
+        :root {
+            --bg: #0b0d0e; --card-bg: rgba(26, 29, 33, 0.9); --text-main: #ffffff;
+            --text-gray: #9ca3af; --nav-border: rgba(255,255,255,0.1); --input-bg: rgba(255,255,255,0.05);
+            --accent: #ffffff; --btn-text: #000000; --transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        [data-theme="light"] {
+            --bg: #f0f2f5; --card-bg: rgba(255, 255, 255, 0.95); --text-main: #1a1d21;
+            --text-gray: #64748b; --nav-border: rgba(0,0,0,0.1); --input-bg: #ffffff;
+            --accent: #1a1d21; --btn-text: #ffffff;
         }
 
-        @keyframes gradientAnimation {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg); color: var(--text-main); transition: var(--transition); min-height: 100vh; overflow: hidden; }
+        body.allow-scroll { overflow-y: auto; }
+        .no-select { user-select: none; -webkit-user-select: none; }
+
+        #neural-canvas { position: fixed; inset: 0; z-index: -1; opacity: 0.3; }
+
+        .theme-toggle {
+            position: fixed; bottom: 25px; left: 25px; width: 50px; height: 50px;
+            background: var(--card-bg); border: 1px solid var(--nav-border);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 6000; font-size: 1.2rem;
         }
 
-        .nav-menu { margin-top: 40px; display: flex; gap: 20px; z-index: 10; }
-        
-        .nav-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white; padding: 12px 30px; cursor: pointer;
-            font-family: 'Montserrat', sans-serif; font-size: 0.8rem;
-            text-transform: uppercase; letter-spacing: 2px;
-            transition: all 0.4s ease; border-radius: 12px;
-        }
+        /* LOGIN */
+        #login-screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; background: var(--bg); }
+        .brand-name { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; letter-spacing: -2px; }
+        .login-frame { background: var(--card-bg); padding: 40px; border-radius: 32px; width: 380px; border: 1px solid var(--nav-border); text-align: center; }
 
-        .nav-btn.active { background: #ffffff; color: #000; }
+        /* NAV */
+        nav { height: 70px; display: flex; align-items: center; justify-content: space-between; padding: 0 5%; border-bottom: 1px solid var(--nav-border); background: var(--card-bg); position: sticky; top: 0; z-index: 1000; }
+        .nav-links { display: flex; gap: 20px; list-style: none; }
+        .nav-links li { cursor: pointer; color: var(--text-gray); font-weight: 600; transition: var(--transition); font-size: 0.9rem; }
+        .nav-links li.active { color: var(--text-main); }
 
-        .content-section {
-            display: none; width: 90%; max-width: 850px; margin-top: 50px;
-            opacity: 0; transform: translateY(30px);
-            transition: all 0.6s ease;
-        }
+        .container { padding: 30px 5%; max-width: 1200px; margin: 0 auto; }
+        .page { display: none; opacity: 0; transform: translateY(10px); transition: var(--transition); }
+        .page.active { display: block; opacity: 1; transform: translateY(0); }
 
-        .content-section.active { display: block; opacity: 1; transform: translateY(0); }
+        /* REPORTS */
+        .report-card { background: var(--card-bg); padding: 25px; border-radius: 22px; margin-bottom: 15px; border: 1px solid var(--nav-border); position: relative; }
+        .delete-btn { position: absolute; bottom: 15px; right: 20px; cursor: pointer; opacity: 0.5; transition: 0.2s; }
+        .delete-btn:hover { opacity: 1; color: #ef4444; }
 
-        h1 { 
-            font-size: 3.5rem; 
-            font-weight: 700; 
-            text-align: center; 
-            margin-bottom: 0; /* Убираем нижний отступ, чтобы точно отмерить 6см */
-            letter-spacing: 8px; 
-            text-transform: uppercase; 
-        }
+        /* MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; z-index: 4500; }
+        .modal-overlay.active { display: flex; }
 
-        /* ПРИВЕТСТВЕННЫЙ ТЕКСТ (КУРСИВ И ОТСТУП 6 СМ) */
-        .welcome-text {
-            margin-top: 230px; /* Примерно 6 сантиметров от заголовка */
-            font-style: italic;
-            text-align: center;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: #d1d1d1;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-        }
+        .btn { padding: 12px 20px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: var(--transition); }
+        .btn-publish { background: var(--accent); color: var(--btn-text); }
+        .btn-outline { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--nav-border); }
 
-        .info-card {
-            background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 24px;
-            display: flex; align-items: center; padding: 35px; margin-top: 50px; margin-bottom: 25px;
-        }
+        /* PROFILE SPECIFIC */
+        .avatar-container { width:120px; height:120px; border-radius:50%; background:var(--input-bg); margin: 0 auto 20px; display:flex; align-items:center; justify-content:center; border:2px dashed var(--nav-border); overflow:hidden; position: relative; cursor: pointer; }
+        .avatar-container img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-card { background: var(--card-bg); padding: 40px; border-radius: 30px; border: 1px solid var(--nav-border); max-width: 500px; margin: 0 auto; text-align:center; }
+        .input-field { width:100%; padding:12px; margin:8px 0 18px; border-radius:12px; background:var(--input-bg); border:1px solid var(--nav-border); color:var(--text-main); outline: none; }
 
-        .card-img { width: 140px; height: 140px; border-radius: 18px; object-fit: cover; margin-right: 30px; background: #222; }
-
-        .contact-container { display: flex; flex-direction: column; gap: 20px; align-items: center; }
-        
-        .social-link {
-            width: 100%; max-width: 400px; display: flex; align-items: center; justify-content: center;
-            gap: 15px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 20px; border-radius: 20px; text-decoration: none; color: white;
-            font-size: 1.2rem; font-weight: 700; transition: all 0.4s ease;
-        }
-        
-        .social-link.tg:hover { background: #0088cc; transform: scale(1.05); }
-        .social-link.dc:hover { background: #5865F2; transform: scale(1.05); }
+        /* CALC */
+        .calc-box { max-width: 350px; margin: 0 auto; background: var(--card-bg); padding: 25px; border-radius: 28px; border: 1px solid var(--nav-border); }
+        .calc-display { width: 100%; padding: 20px; background: var(--input-bg); border-radius: 15px; text-align: right; font-size: 1.8rem; margin-bottom: 15px; border: 1px solid var(--nav-border); min-height: 80px; }
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .calc-btn { padding: 18px; border-radius: 12px; border: none; background: var(--input-bg); color: var(--text-main); font-weight: 700; cursor: pointer; }
     </style>
 </head>
-<body oncontextmenu="return false;">
+<body data-theme="dark" class="no-select">
 
-    <nav class="nav-menu">
-        <button class="nav-btn active" onclick="openTab('home')">Biography</button>
-        <button class="nav-btn" onclick="openTab('contact')">Contact</button>
+<canvas id="neural-canvas"></canvas>
+<div class="theme-toggle" onclick="toggleTheme()" id="t-btn">🌙</div>
+
+<div id="login-screen">
+    <h1 class="brand-name">Доншнур</h1>
+    <div class="login-frame">
+        <input type="password" id="login-input" placeholder="Логин" style="width:100%; padding:16px; border-radius:14px; background:var(--input-bg); color:var(--text-main); border:1px solid var(--nav-border); margin-bottom:20px; text-align:center; outline:none;">
+        <button class="btn btn-publish" style="width: 100%;" onclick="tryLogin()">Войти</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="report-modal">
+    <div style="background: var(--card-bg); padding: 30px; border-radius: 28px; width: 90%; max-width: 500px; border: 1px solid var(--nav-border);">
+        <h2>Новый отчет</h2>
+        <textarea id="report-text" placeholder="Описание работы..." style="width:100%; height:150px; margin:15px 0; background:var(--input-bg); border:1px solid var(--nav-border); color:var(--text-main); padding:15px; border-radius:12px; resize:none; outline:none;"></textarea>
+        <input type="file" id="file-input" hidden onchange="updateFileName()">
+        <button class="btn btn-outline" style="width:100%; margin-bottom:15px;" onclick="document.getElementById('file-input').click()">📎 Прикрепить документ</button>
+        <div id="file-name-display" style="font-size:0.8rem; color:var(--text-gray); margin-bottom:10px; text-align: center;"></div>
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-outline" style="flex:1" onclick="closeModal()">Отмена</button>
+            <button class="btn btn-publish" style="flex:1" onclick="saveReport()">Опубликовать</button>
+        </div>
+    </div>
+</div>
+
+<div id="main-interface" style="display:none;">
+    <nav>
+        <div style="font-weight: 800; font-size: 1.2rem;">Доншнур</div>
+        <ul class="nav-links">
+            <li id="li-worker" onclick="showTab('worker')">Работники</li>
+            <li id="li-acc" onclick="showTab('acc')">Бухгалтерия</li>
+            <li id="li-calc" onclick="showTab('calc')">Калькулятор</li>
+            <li id="li-notes" onclick="showTab('notes')">Заметки</li>
+            <li id="li-profile" onclick="showTab('profile')">Профиль</li>
+        </ul>
     </nav>
 
-    <div id="home" class="content-section active">
-        <h1>BytKop</h1>
-        
-        <p class="welcome-text">
-            Здравствуй, посетитель!
-        </p>
+    <div class="container">
+        <div id="section-reports" class="page">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
+                <h1 id="page-title">Отчеты</h1>
+                <button class="btn btn-publish" onclick="openModal()">Создать отчет</button>
+            </div>
+            <div id="list-container"></div>
+        </div>
 
-        <div class="info-card">
-            <img src="img/photo1.jpg" alt="Bio" class="card-img">
-            <div class="card-text">
-                <h2>ОБО МНЕ</h2>
-                <p></p>
+        <div id="section-notes" class="page">
+            <h1>Личные заметки</h1>
+            <textarea id="my-notes" oninput="saveNotesLocal()" style="width:100%; height:calc(100vh - 250px); margin-top:20px; background:var(--card-bg); color:var(--text-main); border-radius:20px; padding:25px; border:1px solid var(--nav-border); resize:none; outline:none; font-size:1.1rem;"></textarea>
+        </div>
+
+        <div id="section-calc" class="page">
+            <div class="calc-box">
+                <div class="calc-display" id="calc-res">0</div>
+                <div class="calc-grid">
+                    <button class="calc-btn" onclick="calcInput('7')">7</button>
+                    <button class="calc-btn" onclick="calcInput('8')">8</button>
+                    <button class="calc-btn" onclick="calcInput('9')">9</button>
+                    <button class="calc-btn" style="color:#3b82f6" onclick="calcInput('/')">÷</button>
+                    <button class="calc-btn" onclick="calcInput('4')">4</button>
+                    <button class="calc-btn" onclick="calcInput('5')">5</button>
+                    <button class="calc-btn" onclick="calcInput('6')">6</button>
+                    <button class="calc-btn" style="color:#3b82f6" onclick="calcInput('*')">×</button>
+                    <button class="calc-btn" onclick="calcInput('1')">1</button>
+                    <button class="calc-btn" onclick="calcInput('2')">2</button>
+                    <button class="calc-btn" onclick="calcInput('3')">3</button>
+                    <button class="calc-btn" style="color:#3b82f6" onclick="calcInput('-')">-</button>
+                    <button class="calc-btn" style="color:#ef4444" onclick="calcClear()">C</button>
+                    <button class="calc-btn" onclick="calcInput('0')">0</button>
+                    <button class="calc-btn" style="background:var(--accent); color:var(--btn-text)" onclick="calculate()">=</button>
+                    <button class="calc-btn" style="color:#3b82f6" onclick="calcInput('+')">+</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="section-profile" class="page">
+            <div class="profile-card">
+                <div class="avatar-container" onclick="document.getElementById('avatar-input').click()">
+                    <img id="avatar-img" src="" style="display:none;">
+                    <span id="avatar-pl">➕</span>
+                </div>
+                <input type="file" id="avatar-input" hidden accept="image/*" onchange="loadAvatar(event)">
+                
+                <div id="profile-view-mode">
+                    <div style="display:flex; align-items:center; justify-content:center; margin-bottom:5px;">
+                        <h2 id="display-name">Артем Д.</h2>
+                        <span style="margin-left:12px; cursor:pointer; font-size: 1.1rem;" onclick="enableEditName()">✏️</span>
+                    </div>
+                    <p style="color:var(--text-gray); font-weight:600; margin-bottom:30px;">Сис-админ</p>
+                </div>
+
+                <div id="profile-edit-mode" style="display:none; margin-bottom: 25px;">
+                    <input type="text" id="edit-name-input" class="input-field" style="text-align: center; font-weight: bold; font-size: 1.2rem;">
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-outline" style="flex:1" onclick="disableEditName()">Отмена</button>
+                        <button class="btn btn-publish" style="flex:1" onclick="saveName()">Сохранить</button>
+                    </div>
+                </div>
+
+                <div style="text-align:left; border-top: 1px solid var(--nav-border); padding-top: 25px;">
+                    <label style="color:var(--text-gray); font-size:0.8rem; font-weight: 600;">ТЕЛЕФОН</label>
+                    <input type="text" id="p-phone" class="input-field" placeholder="+7 (___) ___-__-__">
+                    <label style="color:var(--text-gray); font-size:0.8rem; font-weight: 600;">EMAIL</label>
+                    <input type="text" id="p-email" class="input-field" placeholder="example@mail.com">
+                    <div style="display:flex; gap:10px;">
+                        <button class="btn btn-outline" style="flex:1" onclick="resetContacts()">Отмена</button>
+                        <button class="btn btn-publish" style="flex:1" onclick="saveContacts()">Сохранить контакты</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div id="contact" class="content-section">
-        <h1>Contact</h1>
-        <div class="contact-container">
-            <a href="https://t.me/BytKop" target="_blank" class="social-link tg">
-                <i class="fa-brands fa-telegram"></i> Telegram: @BytKop
-            </a>
-            <a href="https://discord.com/users/bytkop" target="_blank" class="social-link dc">
-                <i class="fa-brands fa-discord"></i> Discord: bytkop
-            </a>
-        </div>
-    </div>
+<script>
+    let user = { 
+        id: "idDrbot", 
+        name: localStorage.getItem('u_name') || "Артем Д.", 
+        role: "Сис-админ" 
+    };
+    let reports = JSON.parse(localStorage.getItem('reports') || '[]');
+    let currentTab = 'worker';
 
-    <script>
-        // Запрет копирования
-        document.onkeydown = function(e) {
-            if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73)) return false;
-        };
+    function tryLogin() {
+        if(document.getElementById('login-input').value === user.id) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-interface').style.display = 'block';
+            document.getElementById('my-notes').value = localStorage.getItem('notes') || '';
+            document.getElementById('display-name').innerText = user.name;
+            
+            // Загрузка аватара
+            const savedAvatar = localStorage.getItem('u_avatar');
+            if(savedAvatar) {
+                const img = document.getElementById('avatar-img');
+                img.src = savedAvatar;
+                img.style.display = 'block';
+                document.getElementById('avatar-pl').style.display = 'none';
+            }
 
-        function openTab(tabId) {
-            const currentSection = document.querySelector('.content-section.active');
-            const nextSection = document.getElementById(tabId);
-            const buttons = document.querySelectorAll('.nav-btn');
-            if (currentSection.id === tabId) return;
-            currentSection.style.opacity = '0';
-            currentSection.style.transform = 'translateY(-20px)';
-            setTimeout(() => {
-                currentSection.classList.remove('active');
-                buttons.forEach(btn => btn.classList.remove('active'));
-                if(tabId === 'home') buttons[0].classList.add('active');
-                else buttons[1].classList.add('active');
-                nextSection.classList.add('active');
-                setTimeout(() => {
-                    nextSection.style.opacity = '1';
-                    nextSection.style.transform = 'translateY(0)';
-                }, 50);
-            }, 400);
+            resetContacts();
+            showTab('worker');
         }
-    </script>
+    }
+
+    function showTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+        document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+        
+        if(tab === 'worker' || tab === 'acc') document.body.classList.add('allow-scroll');
+        else { document.body.classList.remove('allow-scroll'); window.scrollTo(0,0); }
+
+        const sectionId = (tab === 'worker' || tab === 'acc') ? 'section-reports' : 'section-' + tab;
+        const page = document.getElementById(sectionId);
+        page.style.display = 'block';
+        setTimeout(() => page.classList.add('active'), 50);
+        document.getElementById('li-' + tab).classList.add('active');
+
+        if(tab === 'worker' || tab === 'acc') {
+            document.getElementById('page-title').innerText = tab === 'worker' ? "Отчеты работников" : "Отчеты бухгалтеров";
+            renderReports();
+        }
+    }
+
+    // PROFILE LOGIC
+    function enableEditName() {
+        document.getElementById('profile-view-mode').style.display = 'none';
+        document.getElementById('profile-edit-mode').style.display = 'block';
+        document.getElementById('edit-name-input').value = user.name;
+    }
+
+    function disableEditName() {
+        document.getElementById('profile-view-mode').style.display = 'block';
+        document.getElementById('profile-edit-mode').style.display = 'none';
+    }
+
+    function saveName() {
+        const newName = document.getElementById('edit-name-input').value;
+        if(newName.trim() === "") return;
+        user.name = newName;
+        localStorage.setItem('u_name', newName);
+        document.getElementById('display-name').innerText = newName;
+        disableEditName();
+        renderReports();
+    }
+
+    function loadAvatar(e) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            const base64 = reader.result;
+            localStorage.setItem('u_avatar', base64);
+            const img = document.getElementById('avatar-img');
+            img.src = base64;
+            img.style.display = 'block';
+            document.getElementById('avatar-pl').style.display = 'none';
+        }
+        reader.readAsDataURL(file);
+    }
+
+    function saveContacts() {
+        localStorage.setItem('u_phone', document.getElementById('p-phone').value);
+        localStorage.setItem('u_email', document.getElementById('p-email').value);
+        alert("Контакты обновлены!");
+    }
+
+    function resetContacts() {
+        document.getElementById('p-phone').value = localStorage.getItem('u_phone') || '';
+        document.getElementById('p-email').value = localStorage.getItem('u_email') || '';
+    }
+
+    // REPORTS LOGIC
+    function renderReports() {
+        const container = document.getElementById('list-container');
+        container.innerHTML = '';
+        const filtered = reports.filter(r => r.type === currentTab).reverse();
+        filtered.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'report-card';
+            card.innerHTML = `
+                <b>${r.authorId === user.id ? user.name : r.authorName}</b> <span style="font-size:0.75rem; color:var(--text-gray)">${r.date}</span>
+                <p style="margin-top:10px; line-height:1.5;">${r.content}</p>
+                ${r.fileName ? `<div style="color:#3b82f6; cursor:pointer; margin-top:10px; font-size:0.85rem;" onclick="dl('${r.fileName}')">📄 ${r.fileName}</div>` : ''}
+                ${(user.role === 'Сис-админ' || r.authorId === user.id) ? `<span class="delete-btn" onclick="delRep(${r.id})">🗑️</span>` : ''}
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function dl(n) { const a = document.createElement("a"); a.href = "#"; a.download = n; a.click(); }
+    function delRep(id) { reports = reports.filter(r => r.id !== id); localStorage.setItem('reports', JSON.stringify(reports)); renderReports(); }
+    function openModal() { document.getElementById('report-modal').classList.add('active'); }
+    function closeModal() { document.getElementById('report-modal').classList.remove('active'); }
+    function updateFileName() { const f = document.getElementById('file-input').files[0]; document.getElementById('file-name-display').innerText = f ? "Выбрано: " + f.name : ''; }
+    
+    function saveReport() {
+        const text = document.getElementById('report-text').value;
+        if(!text) return;
+        const file = document.getElementById('file-input').files[0];
+        reports.push({
+            id: Date.now(), authorId: user.id, authorName: user.name,
+            type: currentTab, content: text, date: new Date().toLocaleString(),
+            fileName: file ? file.name : null
+        });
+        localStorage.setItem('reports', JSON.stringify(reports));
+        document.getElementById('report-text').value = '';
+        closeModal();
+        renderReports();
+    }
+
+    function saveNotesLocal() { localStorage.setItem('notes', document.getElementById('my-notes').value); }
+    function toggleTheme() {
+        const b = document.body;
+        const theme = b.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        b.setAttribute('data-theme', theme);
+        document.getElementById('t-btn').innerText = theme === 'dark' ? '🌙' : '☀️';
+    }
+
+    // CALC
+    let calcVal = "";
+    function calcInput(v) { calcVal += v; document.getElementById('calc-res').innerText = calcVal; }
+    function calcClear() { calcVal = ""; document.getElementById('calc-res').innerText = "0"; }
+    function calculate() { try { calcVal = eval(calcVal).toString(); document.getElementById('calc-res').innerText = calcVal; } catch { calcVal = "0"; } }
+
+    // BG
+    const canvas = document.getElementById('neural-canvas');
+    const ctx = canvas.getContext('2d');
+    let dots = [];
+    function res() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    window.onresize = res; res();
+    for(let i=0; i<60; i++) dots.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3});
+    function anim() { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle="rgba(150,150,150,0.15)"; dots.forEach(d=>{ d.x+=d.vx; d.y+=d.vy; if(d.x<0||d.x>canvas.width)d.vx*=-1; if(d.y<0||d.y>canvas.height)d.vy*=-1; ctx.beginPath(); ctx.arc(d.x,d.y,1.5,0,Math.PI*2); ctx.fill(); }); requestAnimationFrame(anim); }
+    anim();
+</script>
 </body>
 </html>
